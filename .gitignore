@@ -1,0 +1,28 @@
+
+# Python sanal ortamı
+.venv/
+venv/
+
+# Python geçici dosyaları
+__pycache__/
+*.py[cod]
+
+# Gizli bilgiler
+.env
+.env.*
+!.env.example
+
+# Django yerel veritabanı
+db.sqlite3
+db.sqlite3-journal
+
+# Test dosyaları
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editör ve sistem dosyaları
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
