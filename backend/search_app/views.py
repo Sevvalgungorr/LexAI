@@ -21,5 +21,5 @@ def search_decisions(request):
     top_k = serializer.validated_data["top_k"]
 
     result = search_decisions_service(query, top_k)
-
+    #serializer a kontrol ettirdik veriler doğruysa search_service.py ye gönderir.
     return Response(result, status=status.HTTP_200_OK)
