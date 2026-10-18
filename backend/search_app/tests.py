@@ -1,6 +1,13 @@
+import json
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
+
+from backend.search_app.models import LegalDecision
 
 
 # Arama API'sinin doğru çalışıp çalışmadığını kontrol eden test sınıfı
@@ -60,3 +67,51 @@ class SearchAPITests(TestCase):
 
         # API'nin geçersiz top_k değerini reddettiğini kontrol eder
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+# JSON dosyasından mahkeme kararı aktarma işlemini test eden sınıf
+class ImportDecisionsTests(TestCase):
+
+    # TEST 4: Geçerli JSON verisinin veritabanına kaydedildiğini kontrol eder
+    def test_import_valid_decision(self):
+
+        # Test için kurgusal bir mahkeme kararı oluşturur
+        decisions = [
+            {
+                "court": "Ornek Hukuk Dairesi",
+                "case_number": "TEST-2026/002",
+                "decision_number": "TEST-2026/102",
+                "decision_date": "2026-01-15",
+                "title": "Ornek karar",
+                "content": "Bu, otomatik test icin olusturulmus bir karardir.",
+                "source_url": "",
+            }
+        ]
+
+        # Python'un hazır TemporaryDirectory yapısıyla geçici klasör oluşturur
+        # Test tamamlandığında bu klasör otomatik olarak silinir
+        with TemporaryDirectory() as temporary_dir:
+
+            # Geçici klasörde decisions.json dosyasının yolunu oluşturur
+            file_path = Path(temporary_dir) / "decisions.json"
+
+            # Örnek mahkeme kararını JSON dosyasına yazar
+            with file_path.open("w", encoding="utf-8") as file:
+                json.dump(decisions, file)
+
+            # Django'nun hazır call_command fonksiyonuyla
+            # import_decisions komutunu Python içerisinden çalıştırır
+            call_command("import_decisions", str(file_path))
+
+        # Django ORM ile veritabanındaki karar sayısını kontrol eder
+        # Tam olarak 1 karar kaydedilmiş olmalıdır
+        self.assertEqual(LegalDecision.objects.count(), 1)
+
+        # Veritabanına kaydedilen ilk mahkeme kararını getirir
+        legal_decision = LegalDecision.objects.first()
+
+        # Kaydedilen mahkeme adının beklediğimiz değer olduğunu doğrular
+        self.assertEqual(
+            legal_decision.court,
+            "Ornek Hukuk Dairesi"
+        )
