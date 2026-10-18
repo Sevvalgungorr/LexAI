@@ -111,4 +111,4 @@ python manage.py test backend.search_app
 
 ## Project Status
 
-Under active development as a Computer Engineering graduation project.
+LexAI is an independent AI and software engineering project currently under active development, focusing on natural language processing, semantic search, and intelligent legal information retrieval.
